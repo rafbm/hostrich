@@ -38,9 +38,12 @@ class Hostrich
     status, headers, body = @app.call(env)
     body.close if body.respond_to? :close
 
+    chunks = []
+    body.each { |chunk| chunks << chunk.to_s }
+    body = chunks.join
+
     # Add current host suffix in all response bodies, so that occurences of http://example.com
     # appear as http://example.com.dev or http://example.com.127.0.0.1.xip.io in the browser.
-    body = Array(body.each(&:to_s)).join
     body = [add_suffix(body, suffix)]
 
     # Do the same in response headers. This is important for cookies and redirects.
