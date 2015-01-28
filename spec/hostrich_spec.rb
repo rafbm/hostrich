@@ -11,6 +11,8 @@ describe Hostrich do
         [302, { 'Location' => 'http://foo.com/index.html' }, []]
       when '/cookie'
         [200, { 'Set-Cookie' => 'some_param=foo.com/index.html; Path=/; Domain=.foo.com' }, ['Cookie!']]
+      when '/version.rb'
+        Rack::File.new('lib/hostrich').call(env)
       else
         [200, {}, ['Welcome to foo.com or foo.com.dev, not foo.comzle, not ffoo.com and not bar.io']]
       end
@@ -30,6 +32,11 @@ describe Hostrich do
 
       response = request.get('/cookie', 'HTTP_HOST' => 'foo.com.dev')
       expect(response.headers['Set-Cookie']).to eq 'some_param=foo.com.dev/index.html; Path=/; Domain=.foo.com.dev'
+    end
+
+    it 'works with Rack::File' do
+      response = request.get('/version.rb', 'HTTP_HOST' => 'foo.com.dev')
+      expect(response.body).to include "class Hostrich\n  VERSION"
     end
   end
 
