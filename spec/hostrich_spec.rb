@@ -38,6 +38,11 @@ describe Hostrich do
       response = request.get('/', 'HTTP_HOST' => 'foo.com.dev')
       expect(response.body).to eq 'Welcome to foo.com.dev, foo.com.dev or foo.bar.io, not foo.comzle, not ffoo.com and not bar.io'
     end
+
+    it 'processes request successfully if no HTTP_HOST present' do
+      response = request.get('/')
+      expect(response.body).to eq 'Welcome to foo.com, foo.com.dev or foo.bar.io, not foo.comzle, not ffoo.com and not bar.io'
+    end
   end
 
   context 'passing host as a string' do

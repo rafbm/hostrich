@@ -23,7 +23,11 @@ class Hostrich
 
     # Extract suffix from current request host.
     match = nil
-    @@hosts.detect { |host| match = env['HTTP_HOST'].match(/#{host}(\.[\.\w-]+)?/) }
+    @@hosts.detect { |host|
+      if http_host = env['HTTP_HOST']
+        match = http_host.match(/#{host}(\.[\.\w-]+)?/)
+      end
+    }
     return @app.call(env) if match.nil?
 
     suffix = match[1]
