@@ -32,11 +32,15 @@ class Hostrich
 
     suffix = match[1]
 
-    # Fake request host.
+    # Fake host in request headers.
     # Eg. If request is made from http://example.com.dev or http://example.com.127.0.0.1.xip.io,
     # the Rack app will see it just as a request to http://example.com.
-    env['HTTP_HOST']   = remove_suffix(env['HTTP_HOST'], suffix)
     env['SERVER_NAME'] = remove_suffix(env['SERVER_NAME'], suffix)
+    env.each do |key, value|
+      if key.start_with?('HTTP_') && String === value
+        env[key] = remove_suffix(value, suffix)
+      end
+    end
 
     # Get regular response from Rack app
     status, headers, body = @app.call(env)

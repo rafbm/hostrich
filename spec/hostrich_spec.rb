@@ -9,6 +9,10 @@ describe Hostrich do
       case env['PATH_INFO']
       when '/redirect'
         [302, { 'Location' => 'http://foo.com/index.html' }, []]
+      when '/origin'
+        [200, {}, [env['HTTP_ORIGIN'] == 'http://foo.com' ? 'right' : 'wrong']]
+      when '/referer'
+        [200, {}, [env['HTTP_REFERER'] == 'http://foo.com' ? 'right' : 'wrong']]
       when '/cookie'
         [200, { 'Set-Cookie' => 'some_param=foo.com/index.html; Path=/; Domain=.foo.bar.io' }, ['Cookie!']]
       when '/version.rb'
@@ -27,6 +31,12 @@ describe Hostrich do
 
       response = request.get('/cookie', 'HTTP_HOST' => 'foo.com.dev')
       expect(response.headers['Set-Cookie']).to eq 'some_param=foo.com.dev/index.html; Path=/; Domain=.foo.bar.io'
+
+      response = request.get('/origin', 'HTTP_HOST' => 'foo.com.dev', 'HTTP_ORIGIN' => 'http://foo.com.dev')
+      expect(response.body).to eq 'right'
+
+      response = request.get('/referer', 'HTTP_HOST' => 'foo.com.dev', 'HTTP_REFERER' => 'http://foo.com.dev')
+      expect(response.body).to eq 'right'
     end
 
     it 'works with Rack::File' do
